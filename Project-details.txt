@@ -1,0 +1,75 @@
+Database side
+1. Cassandra:
+	- On Cassandra side, I created a keyspace edureka and a table productlist inside edureka
+	- bin/cqlsh 192.168.99.101
+	- CREATE KEYSPACE edureka WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+	- use edureka;
+	- CREATE TABLE productlist (
+		pogId text,
+		supC text,
+		brand text,
+		description text,
+		size text,
+		category text,
+		subCategory text,
+		country text,
+		sellerCode text,
+		PRIMARY KEY((pogId, supC),category )
+		);
+2. MySQL:
+	- On MySQL side, I created a database edureka and a table productlist inside edureka
+	- service mysqld start
+	- mysql -u root -p
+	- use edureka;
+	- CREATE TABLE productlist (
+		pogId varchar(255),
+		supC varchar(255),
+		price float,
+		quantity int
+		);
+
+Used eclipse and created 3 projects in eclipse for this assignment
+
+1. CassandraMySQLWrite
+This project has 2 JAVA files
+
+1a. ProductModelNew.java
+	- This is the class that has all attributes mentioned in the requirement
+	
+1b. AsynchronousProductProducer.java 
+	- This is the asynchronous producer of kafka
+	- It reads the file from C:\\src\\products.csv
+	- Reads line by line and Splits by comma
+	- Creates a ProductModelNew object
+	- Converts to a Json string and produces to the topic(productlisttopic) till the end of the file
+
+2. CassandraMySQLConsumer
+This project has 3 JAVA files
+
+2a. ProductModel.java
+	- Exactly same Product Model with just a different class name
+	- Same as ProductModelNew.java
+	
+2a. CassandraConnector.java
+	- helps to connect to the cluster
+	
+2c. WriteToCassandra.java
+	- It is one of the consumer of kafka and subscribes to topic(productlisttopic)
+	- It is part of consumer group grp-1
+	- polls the record and converts the record to ProductModel object
+	- It then calls the CassandraConnector class and connects to cassandra cluster
+	- INSERT INTO edureka.productlist
+
+3. MySQLConsumer
+This project has 2 JAVA files
+
+3a. ProductModelMySQL.java
+	- Exactly same Product Model with just a different class name
+	- Same as ProductModelNew.java
+	
+3b. SimpleMySQLConsumer.java
+	- It is one of the consumer of kafka and subscribes to topic(productlisttopic)
+	- It is part of consumer group grp-2
+	- polls the record and converts the record to ProductModel object
+	- uses jdbc:mysql://192.168.99.101:3306/edureka to connect to MySQL
+	- INSERT INTO productlist
